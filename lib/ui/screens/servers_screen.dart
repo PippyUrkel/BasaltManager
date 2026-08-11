@@ -5,11 +5,9 @@ class ServersScreen extends StatelessWidget{
 
     @override
     Widget build(BuildContext context){
-        return const Scaffold(
-            body: Center(
-                child: Text("Server Screen"),
-            ),
-        );
+      return Center(
+        child: Text("Server Screen"),
+      );
     }
 
 }

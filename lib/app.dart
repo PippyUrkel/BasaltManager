@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'ui/screens/dashboard_screen.dart';
+import 'ui/shell/app_shell.dart';
 import 'theme.dart';
 
 class ServerManagerApp extends StatelessWidget {
@@ -10,11 +11,7 @@ class ServerManagerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Basalt Server Manager',
       theme: appTheme,
-      home: const Scaffold(
-        body: Center(
-          child: Text('Server Manager'),
-          ),
-      ),
+      home: const AppShell(),
     );
   }
 }
