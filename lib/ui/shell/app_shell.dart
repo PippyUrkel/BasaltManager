@@ -15,9 +15,9 @@ class AppShell extends StatefulWidget{
 
 class _AppShellState extends State<AppShell> {
   static const List<Widget> _screens = [
-    const DashboardScreen(),
-    const ServersScreen(),
-    const SettingsScreen(),
+    DashboardScreen(),
+    ServersScreen(),
+    SettingsScreen(),
   ];
 
   int _selectedIndex = 0;
@@ -27,6 +27,10 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context){
 
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 20,
+        
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -47,7 +51,7 @@ class _AppShellState extends State<AppShell> {
           NavigationDestination(
             icon: Icon(Icons.dns_outlined),
             selectedIcon: Icon(Icons.dns),
-            label: 'Dashboard'
+            label: 'Flakes'
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

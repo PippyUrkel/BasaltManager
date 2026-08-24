@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'ui/screens/dashboard_screen.dart';
 import 'ui/shell/app_shell.dart';
 import 'core/theme/theme.dart';
 
