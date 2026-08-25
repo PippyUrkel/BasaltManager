@@ -7,7 +7,8 @@ class ServerCard extends StatelessWidget {
   final int port;
   final bool running;
   final String flakeType;
-  final String flakeRef;
+  final String host;
+  final String protocol;
   final String uptime;
   final double cpuUsage;
   final String memoryUsage;
@@ -26,7 +27,8 @@ class ServerCard extends StatelessWidget {
     int? port,
     bool? running,
     String? flakeType,
-    String? flakeRef,
+    String? host,
+    String? protocol,
     String? uptime,
     double? cpuUsage,
     String? memoryUsage,
@@ -40,8 +42,9 @@ class ServerCard extends StatelessWidget {
   })  : name = name ?? server?.name ?? 'Server',
         port = port ?? server?.port ?? 8080,
         running = running ?? server?.isRunning ?? false,
-        flakeType = flakeType ?? server?.flakeType ?? 'Nix Flake',
-        flakeRef = flakeRef ?? server?.flakeRef ?? 'flake.nix',
+        flakeType = flakeType ?? server?.flakeType ?? 'Web Service',
+        host = host ?? server?.host ?? '127.0.0.1',
+        protocol = protocol ?? server?.protocol ?? 'HTTP',
         uptime = uptime ?? server?.uptime ?? (running == true ? '1h 24m' : 'Offline'),
         cpuUsage = cpuUsage ?? server?.cpuUsage ?? (running == true ? 12.5 : 0.0),
         memoryUsage = memoryUsage ?? server?.memoryUsageString ?? (running == true ? '256 MB' : '0 MB'),
@@ -64,7 +67,8 @@ class ServerCard extends StatelessWidget {
       port: server.port,
       running: server.isRunning,
       flakeType: server.flakeType,
-      flakeRef: server.flakeRef,
+      host: server.host,
+      protocol: server.protocol,
       uptime: server.uptime,
       cpuUsage: server.cpuUsage,
       memoryUsage: server.memoryUsageString,
@@ -86,7 +90,7 @@ class ServerCard extends StatelessWidget {
       elevation: running ? 3 : 1,
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(
           color: running
               ? colors.primary.withValues(alpha: 0.35)
@@ -98,7 +102,7 @@ class ServerCard extends StatelessWidget {
           ? colors.surfaceContainerHigh
           : colors.surfaceContainerLow,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -156,7 +160,7 @@ class ServerCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: colors.surfaceContainerHighest
                                     .withValues(alpha: 0.6),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 flakeType,
@@ -170,7 +174,7 @@ class ServerCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
-                                flakeRef,
+                                '$host:$port',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -255,7 +259,7 @@ class ServerCard extends StatelessWidget {
                                 vertical: 0,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             icon: const Icon(
@@ -280,7 +284,7 @@ class ServerCard extends StatelessWidget {
                                 vertical: 0,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             icon: const Icon(
@@ -335,18 +339,18 @@ class ServerCard extends StatelessWidget {
   Widget _buildStatusBadge(ColorScheme colors) {
     final statusColor = running
         ? const Color(0xFF4CAF50)
-        : const Color(0xFFE57373);
+        : const Color(0xFFEF5350);
     final statusBgColor = running
-        ? const Color(0xFF1B5E20).withValues(alpha: 0.3)
-        : const Color(0xFFB71C1C).withValues(alpha: 0.2);
+        ? const Color(0xFF1B3D20)
+        : const Color(0xFF3D1B1B);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: statusBgColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: statusColor.withValues(alpha: 0.4),
+          color: statusColor,
           width: 1,
         ),
       ),
@@ -354,25 +358,16 @@ class ServerCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 7,
-            height: 7,
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              shape: BoxShape.rectangle,
               color: statusColor,
-              boxShadow: running
-                  ? [
-                      BoxShadow(
-                        color: statusColor.withValues(alpha: 0.6),
-                        blurRadius: 5,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
             ),
           ),
           const SizedBox(width: 5),
           Text(
-            running ? 'ONLINE' : 'OFFLINE',
+            running ? 'LIVE' : 'DOWN',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
@@ -456,7 +451,7 @@ class ServerCard extends StatelessWidget {
           backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
           foregroundColor: onPressed != null ? colors.onSurfaceVariant : colors.outline.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         icon: Icon(icon),

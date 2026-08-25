@@ -24,6 +24,12 @@ class ResourceCard extends StatelessWidget{
 
     return Expanded(
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: resourceValue > 70 ? Colors.red.withValues(alpha: 0.25) : colors.outline.withValues(alpha: 0.25)
+          )
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(

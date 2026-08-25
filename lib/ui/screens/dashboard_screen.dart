@@ -20,10 +20,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const Server(
       id: 'srv-1',
       name: 'Django API Server',
+      host: '127.0.0.1',
       port: 8000,
+      protocol: 'HTTP',
       status: ServerStatus.running,
       flakeType: 'Python Web API',
-      flakeRef: 'flake:nixos#django-api',
+      flakeRef: '127.0.0.1:8000/health',
+      healthPath: '/health',
       uptime: '4d 12h',
       cpuUsage: 14.2,
       memoryUsagePercent: 18.0,
@@ -31,14 +34,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '450 KB/s',
       icon: Icons.webhook_rounded,
       environment: 'Production',
+      latencyMs: 14,
+      statusMessage: '200 OK — Healthy',
     ),
     const Server(
       id: 'srv-2',
-      name: 'Minecraft Server',
+      name: 'Minecraft SMP Server',
+      host: 'localhost',
       port: 25565,
+      protocol: 'TCP',
       status: ServerStatus.running,
       flakeType: 'Game Server',
-      flakeRef: 'nixpkgs#minecraft-paper',
+      flakeRef: 'localhost:25565',
+      healthPath: '',
       uptime: '2d 08h',
       cpuUsage: 38.5,
       memoryUsagePercent: 60.0,
@@ -46,14 +54,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '1.8 MB/s',
       icon: Icons.sports_esports_rounded,
       environment: 'Production',
+      latencyMs: 28,
+      statusMessage: 'Socket Connected — 12 Players',
     ),
     const Server(
       id: 'srv-3',
       name: 'PostgreSQL Database',
+      host: '127.0.0.1',
       port: 5432,
+      protocol: 'TCP',
       status: ServerStatus.running,
       flakeType: 'SQL Database',
-      flakeRef: 'flake:nixos#postgres-db',
+      flakeRef: '127.0.0.1:5432',
+      healthPath: '',
       uptime: '14d 06h',
       cpuUsage: 6.8,
       memoryUsagePercent: 25.0,
@@ -61,14 +74,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '120 KB/s',
       icon: Icons.storage_rounded,
       environment: 'Production',
+      latencyMs: 4,
+      statusMessage: 'TCP Handshake OK',
     ),
     const Server(
       id: 'srv-4',
       name: 'Redis Cache',
+      host: '127.0.0.1',
       port: 6379,
+      protocol: 'TCP',
       status: ServerStatus.running,
       flakeType: 'In-Memory Store',
-      flakeRef: 'flake:nixos#redis-cache',
+      flakeRef: '127.0.0.1:6379',
+      healthPath: '',
       uptime: '14d 06h',
       cpuUsage: 1.5,
       memoryUsagePercent: 12.0,
@@ -76,14 +94,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '240 KB/s',
       icon: Icons.memory_rounded,
       environment: 'Production',
+      latencyMs: 2,
+      statusMessage: 'PONG Response',
     ),
     const Server(
       id: 'srv-5',
       name: 'Next.js Frontend',
+      host: 'localhost',
       port: 3000,
+      protocol: 'HTTP',
       status: ServerStatus.stopped,
       flakeType: 'Web Client',
-      flakeRef: 'github:org/frontend#app',
+      flakeRef: 'localhost:3000',
+      healthPath: '/',
       uptime: 'Offline',
       cpuUsage: 0.0,
       memoryUsagePercent: 0.0,
@@ -91,14 +114,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '0 KB/s',
       icon: Icons.devices_rounded,
       environment: 'Development',
+      latencyMs: 0,
+      statusMessage: 'Connection Refused',
     ),
     const Server(
       id: 'srv-6',
       name: 'Prometheus & Grafana',
+      host: '127.0.0.1',
       port: 9090,
+      protocol: 'HTTP',
       status: ServerStatus.stopped,
       flakeType: 'Telemetry Stack',
-      flakeRef: 'flake:nixos#monitoring',
+      flakeRef: '127.0.0.1:9090/-/healthy',
+      healthPath: '/-/healthy',
       uptime: 'Offline',
       cpuUsage: 0.0,
       memoryUsagePercent: 0.0,
@@ -106,6 +134,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       networkSpeed: '0 KB/s',
       icon: Icons.insights_rounded,
       environment: 'Staging',
+      latencyMs: 0,
+      statusMessage: 'Port inactive',
     ),
   ];
 
@@ -118,6 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         uptime: newStatus == ServerStatus.running ? 'Just started' : 'Offline',
         cpuUsage: newStatus == ServerStatus.running ? 8.0 : 0.0,
         memoryUsageString: newStatus == ServerStatus.running ? '210 MB' : '0 MB',
+        latencyMs: newStatus == ServerStatus.running ? 14 : 0,
       );
     });
 
@@ -126,8 +157,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       SnackBar(
         content: Text(
           s.isRunning
-              ? '${s.name} started on port ${s.port}'
-              : '${s.name} stopped',
+              ? '${s.name} monitoring started on port ${s.port}'
+              : '${s.name} monitoring paused',
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -139,14 +170,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final s = _servers[index];
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Restarting ${s.name}...'),
+        content: Text('Checking socket connectivity for ${s.name}...'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
     );
 
     setState(() {
-      _servers[index] = s.copyWith(uptime: 'Restarted just now');
+      _servers[index] = s.copyWith(uptime: 'Checked just now');
     });
   }
 
@@ -188,7 +219,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '${server.name} — Nix Flake Logs',
+                          '${server.name} — Port Telemetry',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -202,7 +233,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                   Text(
-                    'Target: ${server.flakeRef} • Port :${server.port}',
+                    'Address: ${server.host}:${server.port}${server.healthPath} • ${server.protocol}',
                     style: TextStyle(
                       fontSize: 12,
                       color: colors.outline,
@@ -223,17 +254,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: ListView(
                         controller: scrollController,
                         children: [
-                          _buildLogLine('[basalt] Initializing flake build: ${server.flakeRef}', Colors.blueAccent),
-                          _buildLogLine('[nix-daemon] Evaluating derivation graph...', Colors.grey),
-                          _buildLogLine('[nix-daemon] Build finished in 1.42s', Colors.greenAccent),
-                          _buildLogLine('[systemd] Starting unit basalt-${server.id}.service...', Colors.white70),
-                          _buildLogLine('[systemd] Listening on 0.0.0.0:${server.port}', Colors.greenAccent),
+                          _buildLogLine('[basalt-monitor] Polling socket ${server.host}:${server.port}...', Colors.blueAccent),
+                          _buildLogLine('[basalt-probe] Protocol: ${server.protocol} probe dispatched', Colors.grey),
                           if (server.isRunning) ...[
-                            _buildLogLine('[service] Process running with PID 14209', Colors.cyanAccent),
-                            _buildLogLine('[service] Healthcheck OK: HTTP GET /health -> 200 OK', Colors.greenAccent),
-                            _buildLogLine('[metrics] CPU: ${server.cpuUsage}% | Memory: ${server.memoryUsageString}', Colors.amberAccent),
+                            _buildLogLine('[basalt-probe] Connection established in ${server.latencyMs}ms', Colors.greenAccent),
+                            _buildLogLine('[health] Status 200 OK — Socket live', Colors.cyanAccent),
+                            _buildLogLine('[telemetry] CPU: ${server.cpuUsage}% | Memory: ${server.memoryUsageString}', Colors.amberAccent),
+                            _buildLogLine('[telemetry] Network throughput: ${server.networkSpeed}', Colors.white70),
                           ] else ...[
-                            _buildLogLine('[systemd] Service stopped cleanly.', Colors.redAccent),
+                            _buildLogLine('[basalt-probe] Connection refused: Port ${server.port} closed or paused', Colors.redAccent),
                           ],
                         ],
                       ),
@@ -375,7 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                         child: Text(
-                          '$runningCount/${_servers.length} Running',
+                          '$runningCount/${_servers.length} Active',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -480,70 +509,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
 
             const SizedBox(height: 20),
-
-            // Quick Ports & Services Overview
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Quick Port Matrix',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: colors.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _servers.map((s) {
-                      return ActionChip(
-                        avatar: Icon(
-                          s.isRunning
-                              ? Icons.check_circle_rounded
-                              : Icons.cancel_rounded,
-                          size: 14,
-                          color: s.isRunning
-                              ? Colors.greenAccent
-                              : colors.outline,
-                        ),
-                        label: Text(
-                          '${s.name.split(" ").first} :${s.port}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: s.isRunning
-                                ? colors.onSurface
-                                : colors.outline,
-                          ),
-                        ),
-                        backgroundColor: s.isRunning
-                            ? colors.surfaceContainerHigh
-                            : colors.surfaceContainerLowest,
-                        side: BorderSide(
-                          color: s.isRunning
-                              ? colors.primary.withValues(alpha: 0.3)
-                              : colors.outlineVariant.withValues(alpha: 0.2),
-                        ),
-                        onPressed: () {
-                          final idx = _servers.indexOf(s);
-                          if (idx != -1) {
-                            _carouselController.animateToPage(
-                              idx,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
