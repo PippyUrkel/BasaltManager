@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../../models/server.dart';
 import '../widgets/resource_card.dart';
 import '../widgets/server_card.dart';
+import '../widgets/ssh_terminal_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -509,6 +510,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
 
             const SizedBox(height: 20),
+
+            // Host SSH Terminal
+            const SshTerminalCard(),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
