@@ -43,7 +43,7 @@ jobs:
       
       - name: Rename apk
         run: |
-          mv build/app/outputs/flutter-apk/apk-release.apk Basalt-${{github.ref_name}}.apk
+          mv build/app/outputs/flutter-apk/app-release.apk Basalt-${{github.ref_name}}.apk
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
