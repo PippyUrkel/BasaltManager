@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Carbon-black tonal palette -->
+    <linearGradient id="surface" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171A19"/>
+      <stop offset="1" stop-color="#090A0A"/>
+    </linearGradient>
+
+    <linearGradient id="flake" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#B8BCB9"/>
+      <stop offset=".48" stop-color="#777C79"/>
+      <stop offset="1" stop-color="#383C3A"/>
+    </linearGradient>
+
+    <linearGradient id="flake2" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#5C625F"/>
+      <stop offset=".5" stop-color="#A4A9A6"/>
+      <stop offset="1" stop-color="#4A4F4C"/>
+    </linearGradient>
+
+    <filter id="elevation" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow
+        dx="0"
+        dy="10"
+        stdDeviation="14"
+        flood-color="#000"
+        flood-opacity=".58"/>
+    </filter>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <!-- Full-scale square carbon-black app surface -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#surface)"/>
+
+  <!-- Subtle tonal depth -->
+  <circle
+    cx="256"
+    cy="256"
+    r="200"
+    fill="#252A27"
+    opacity=".20"
+    filter="url(#glow)"/>
+
+  <!-- BACK FLAKES: small basalt fragments -->
+  <g opacity=".62" filter="url(#elevation)">
+    <path
+      d="M82 177 L108 139 L150 132 L172 161 L156 203 L113 213 Z"
+      fill="#454A47"/>
+
+    <path
+      d="M350 91 L379 71 L417 83 L430 119 L402 143 L363 129 Z"
+      fill="#565B58"/>
+
+    <path
+      d="M408 253 L436 220 L477 230 L490 267 L463 298 L424 290 Z"
+      fill="#3F4441"/>
+
+    <path
+      d="M79 311 L106 281 L145 289 L159 326 L132 355 L93 347 Z"
+      fill="#5B605D"/>
+
+    <path
+      d="M108 420 L135 386 L174 394 L187 432 L158 461 L119 453 Z"
+      fill="#3B403D"/>
+
+    <path
+      d="M344 415 L374 382 L414 391 L427 430 L399 461 L358 452 Z"
+      fill="#505552"/>
+  </g>
+
+  <!-- CENTRAL BASALT FLAKE CLUSTER -->
+  <g
+    filter="url(#elevation)"
+    stroke="#101211"
+    stroke-width="5"
+    stroke-linejoin="round">
+
+    <!-- Large rear shard -->
+    <path
+      d="M164 212 L207 134 L281 112 L347 150 L360 227 L313 280 L232 271 Z"
+      fill="url(#flake2)"/>
+
+    <!-- Left columnar flake -->
+    <path
+      d="M104 239 L142 186 L202 199 L223 259 L192 318 L133 310 Z"
+      fill="url(#flake)"/>
+
+    <!-- Right columnar flake -->
+    <path
+      d="M310 219 L351 171 L413 187 L431 248 L397 304 L337 292 Z"
+      fill="url(#flake2)"/>
+
+    <!-- Central hero flake -->
+    <path
+      d="M215 219 L261 159 L325 176 L351 236 L320 300 L256 318 L210 278 Z"
+      fill="#969B98"/>
+
+    <!-- Lower-left flake -->
+    <path
+      d="M132 318 L176 281 L234 301 L247 365 L208 414 L148 395 Z"
+      fill="url(#flake2)"/>
+
+    <!-- Lower-right flake -->
+    <path
+      d="M288 307 L336 279 L392 308 L400 368 L360 414 L301 394 Z"
+      fill="url(#flake)"/>
+
+    <!-- Bottom hero shard -->
+    <path
+      d="M214 389 L256 333 L316 347 L340 405 L303 460 L245 463 L204 425 Z"
+      fill="#676C69"/>
+
+  </g>
+
+  <!-- Tiny chips / flakes -->
+  <g fill="#8C918E">
+    <path
+      d="M74 254 L90 236 L111 245 L115 266 L98 281 L78 273 Z"/>
+
+    <path
+      d="M399 157 L413 140 L433 146 L437 166 L421 181 L402 174 Z"/>
+
+    <path
+      d="M384 348 L400 331 L420 338 L423 359 L407 373 L389 366 Z"/>
+
+    <path
+      d="M188 107 L200 92 L218 98 L221 116 L207 128 L191 122 Z"/>
+
+    <path
+      d="M72 383 L85 367 L104 373 L107 391 L93 405 L76 399 Z"/>
+  </g>
+
+  <!-- Material-style atmospheric highlight -->
+  <path
+    d="M94 82 C179 32 280 27 361 48"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="2"
+    opacity=".055"/>
+</svg>
