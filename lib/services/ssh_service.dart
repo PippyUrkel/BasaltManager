@@ -68,7 +68,6 @@ class SshTerminalSession extends ChangeNotifier {
   })  : _config = config ?? const SshConfig(),
         terminal = terminal ?? Terminal(maxLines: 2000) {
     _setupTerminalHandlers();
-    _printWelcome();
   }
 
   SshConfig get config => _config;
@@ -76,14 +75,6 @@ class SshTerminalSession extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isConnected => _state == SshConnectionState.connected;
   bool get isConnecting => _state == SshConnectionState.connecting;
-
-  void _printWelcome() {
-    terminal.write('\x1B[1;34m╔══════════════════════════════════════════════════════════════╗\x1B[0m\r\n');
-    terminal.write('\x1B[1;34m║\x1B[0m \x1B[1;32mBasalt Server Management — Terminal (dartssh2)\x1B[0m                \x1B[1;34m║\x1B[0m\r\n');
-    terminal.write('\x1B[1;34m╚══════════════════════════════════════════════════════════════╝\x1B[0m\r\n');
-    terminal.write('\x1B[90mTarget: ${_config.summary}\x1B[0m\r\n');
-    terminal.write('\x1B[33mTap "Connect" or configure credentials to start a live SSH session.\x1B[0m\r\n\r\n');
-  }
 
   void updateConfig(SshConfig newConfig) {
     _config = newConfig;

@@ -187,16 +187,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Host Terminal'), findsOneWidget);
-    expect(find.text('(dartssh2)'), findsOneWidget);
     expect(find.text('andre@127.0.0.1:22'), findsOneWidget);
-    expect(find.text('DISCONNECTED'), findsOneWidget);
+    expect(find.text('OFFLINE'), findsOneWidget);
     expect(find.text('uptime'), findsOneWidget);
     expect(find.text('Ctrl+C'), findsOneWidget);
     expect(find.text('Tab'), findsOneWidget);
     expect(find.text('ESC'), findsOneWidget);
 
-    // Tap SSH Connection Settings button
-    await tester.tap(find.byTooltip('SSH Connection Settings'));
+    // Tap Terminal Options PopupMenu
+    await tester.tap(find.byTooltip('Terminal Options'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('SSH Settings'), findsOneWidget);
+    expect(find.text('Clear Screen'), findsOneWidget);
+
+    // Tap SSH Settings
+    await tester.tap(find.text('SSH Settings'));
     await tester.pumpAndSettle();
 
     expect(find.text('SSH Connection Settings'), findsOneWidget);

@@ -87,10 +87,14 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
             ),
             Text(
               session.config.summary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11,
                 fontFamily: 'monospace',
@@ -100,49 +104,87 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
           ],
         ),
         actions: [
-          // Connection status badge
+          // Connection status badge (tappable)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: _buildStatusBadge(session),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                if (session.isConnected) {
+                  session.disconnect();
+                } else if (!session.isConnecting) {
+                  session.connect();
+                }
+              },
+              child: _buildStatusBadge(session),
+            ),
           ),
           const SizedBox(width: 4),
 
           // Connect / Disconnect button
           if (session.isConnected)
             IconButton(
-              icon: const Icon(Icons.link_off_rounded, color: Colors.redAccent),
+              icon: const Icon(Icons.link_off_rounded, color: Colors.redAccent, size: 20),
               tooltip: 'Disconnect SSH',
+              visualDensity: VisualDensity.compact,
               onPressed: session.disconnect,
             )
           else if (session.isConnecting)
             const Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 10),
               child: SizedBox(
-                width: 20,
-                height: 20,
+                width: 16,
+                height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             )
           else
             IconButton(
-              icon: const Icon(Icons.link_rounded, color: Color(0xFF81C784)),
+              icon: const Icon(Icons.link_rounded, color: Color(0xFF81C784), size: 20),
               tooltip: 'Connect SSH',
+              visualDensity: VisualDensity.compact,
               onPressed: session.connect,
             ),
 
-          // Config Dialog Button
-          IconButton(
-            icon: const Icon(Icons.tune_rounded),
-            tooltip: 'SSH Settings',
-            onPressed: _openConfig,
+          // More options menu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded, size: 20),
+            tooltip: 'Options',
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onSelected: (val) {
+              if (val == 'settings') {
+                _openConfig();
+              } else if (val == 'clear') {
+                session.clearTerminal();
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.tune_rounded, size: 16, color: colors.outline),
+                    const SizedBox(width: 10),
+                    const Text('SSH Settings', style: TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.cleaning_services_rounded, size: 16, color: colors.outline),
+                    const SizedBox(width: 10),
+                    const Text('Clear Screen', style: TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
+            ],
           ),
-
-          // Clear Terminal Button
-          IconButton(
-            icon: const Icon(Icons.cleaning_services_rounded),
-            tooltip: 'Clear Screen',
-            onPressed: session.clearTerminal,
-          ),
+          const SizedBox(width: 4),
         ],
       ),
       body: SafeArea(
@@ -152,27 +194,24 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
             if (session.state == SshConnectionState.error)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 color: Colors.red.withValues(alpha: 0.15),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 18),
+                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         session.errorMessage ?? 'SSH connection error',
-                        style: const TextStyle(fontSize: 12, color: Colors.redAccent),
+                        style: const TextStyle(fontSize: 11.5, color: Colors.redAccent),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton(
+                      style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                       onPressed: session.connect,
-                      child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    TextButton(
-                      onPressed: _openConfig,
-                      child: const Text('Configure'),
+                      child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                   ],
                 ),
@@ -213,14 +252,15 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
                     _buildShortcutButton('▼ Down', () => session.sendArrowDown(), colors),
                     _buildShortcutButton('Ctrl+D', () => session.sendCtrlD(), colors),
                     _buildShortcutButton('Ctrl+L', () => session.sendCtrlL(), colors),
-                    const SizedBox(width: 8),
-                    Container(height: 16, width: 1, color: Colors.grey.withValues(alpha: 0.3)),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    Container(height: 14, width: 1, color: Colors.grey.withValues(alpha: 0.3)),
+                    const SizedBox(width: 6),
                     ..._quickCommands.map((cmd) {
                       return Padding(
-                        padding: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.only(right: 5),
                         child: ActionChip(
                           visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
                           backgroundColor: const Color(0xFF21262D),
                           side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.2)),
                           label: Text(
@@ -243,7 +283,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
             // Command input row
             Container(
               color: const Color(0xFF161B22),
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+              padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -251,7 +291,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
                       controller: _commandController,
                       style: const TextStyle(
                         fontFamily: 'monospace',
-                        fontSize: 13,
+                        fontSize: 12.5,
                         color: Colors.white,
                       ),
                       decoration: InputDecoration(
@@ -260,7 +300,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
                             : 'Connect SSH to execute commands...',
                         hintStyle: TextStyle(
                           fontFamily: 'monospace',
-                          fontSize: 11.5,
+                          fontSize: 11,
                           color: colors.outline.withValues(alpha: 0.6),
                         ),
                         prefixIcon: const Padding(
@@ -269,43 +309,44 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
                             '>',
                             style: TextStyle(
                               fontFamily: 'monospace',
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF58A6FF),
                             ),
                           ),
                         ),
-                        prefixIconConstraints: const BoxConstraints(minWidth: 22, minHeight: 0),
+                        prefixIconConstraints: const BoxConstraints(minWidth: 20, minHeight: 0),
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         filled: true,
                         fillColor: const Color(0xFF0D1117),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(color: Color(0xFF30363D)),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(color: Color(0xFF30363D)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(color: Color(0xFF58A6FF)),
                         ),
                       ),
                       onSubmitted: _submitCommand,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   IconButton.filledTonal(
                     style: IconButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
                       backgroundColor: const Color(0xFF238636),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    icon: const Icon(Icons.send_rounded, size: 16),
+                    icon: const Icon(Icons.send_rounded, size: 15),
                     tooltip: 'Send',
                     onPressed: () => _submitCommand(_commandController.text),
                   ),
@@ -325,17 +366,17 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
     bool isDanger = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(right: 6),
+      padding: const EdgeInsets.only(right: 5),
       child: InkWell(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(5),
         onTap: onPressed,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           decoration: BoxDecoration(
             color: isDanger
                 ? Colors.red.withValues(alpha: 0.15)
                 : const Color(0xFF21262D),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(5),
             border: Border.all(
               color: isDanger
                   ? Colors.red.withValues(alpha: 0.3)
@@ -345,7 +386,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10.5,
               fontFamily: 'monospace',
               fontWeight: FontWeight.bold,
               color: isDanger ? Colors.redAccent : const Color(0xFFE6EDF3),
@@ -365,7 +406,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
       case SshConnectionState.connected:
         bg = const Color(0xFF1B3D20);
         fg = const Color(0xFF4CAF50);
-        text = 'LIVE SSH';
+        text = 'LIVE';
         break;
       case SshConnectionState.connecting:
         bg = const Color(0xFF3E3113);
@@ -385,18 +426,18 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: fg, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: 5,
+            height: 5,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: fg,
@@ -406,7 +447,7 @@ class _SshTerminalScreenState extends State<SshTerminalScreen> {
           Text(
             text,
             style: TextStyle(
-              fontSize: 9.5,
+              fontSize: 9,
               fontWeight: FontWeight.bold,
               color: fg,
             ),

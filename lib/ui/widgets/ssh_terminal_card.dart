@@ -135,7 +135,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
         side: BorderSide(
           color: _session.isConnected
               ? colors.primary.withValues(alpha: 0.4)
-              : colors.outlineVariant.withValues(alpha: 0.3),
+              : colors.outlineVariant.withValues(alpha: 0.25),
         ),
       ),
       color: colors.surfaceContainerLow,
@@ -143,9 +143,9 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── Header Bar ───
+          // ─── Clean Header Bar ───
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
             child: Row(
               children: [
                 Container(
@@ -165,28 +165,17 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
-                        children: [
-                          Text(
-                            'Host Terminal',
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            '(dartssh2)',
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF58A6FF),
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Host Terminal',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         _session.config.summary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 11,
                           fontFamily: 'monospace',
@@ -197,62 +186,90 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                   ),
                 ),
 
-                // Connected status pill
-                _buildStatusPill(),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
 
-                // Connect / Disconnect button
-                if (_session.isConnected)
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    iconSize: 18,
-                    tooltip: 'Disconnect SSH',
-                    icon: const Icon(Icons.link_off_rounded, color: Colors.redAccent),
-                    onPressed: _session.disconnect,
-                  )
-                else if (_session.isConnecting)
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                else
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    iconSize: 18,
-                    tooltip: 'Connect SSH',
-                    icon: const Icon(Icons.link_rounded, color: Color(0xFF81C784)),
-                    onPressed: _session.connect,
-                  ),
-
-                // Settings dialog button
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  iconSize: 18,
-                  tooltip: 'SSH Connection Settings',
-                  icon: const Icon(Icons.tune_rounded),
-                  onPressed: _openConfigDialog,
+                // Connected status pill (tappable to connect/disconnect)
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    if (_session.isConnected) {
+                      _session.disconnect();
+                    } else if (!_session.isConnecting) {
+                      _session.connect();
+                    }
+                  },
+                  child: _buildStatusPill(),
                 ),
 
                 // Fullscreen button
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   iconSize: 18,
-                  tooltip: 'Open Fullscreen Terminal',
+                  tooltip: 'Fullscreen',
                   icon: const Icon(Icons.fullscreen_rounded),
                   onPressed: _openFullscreenTerminal,
                 ),
 
-                // Clear button
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  iconSize: 18,
-                  tooltip: 'Clear Output',
-                  icon: const Icon(Icons.cleaning_services_rounded),
-                  onPressed: _session.clearTerminal,
+                // Overflow menu for secondary options
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded, size: 18),
+                  tooltip: 'Terminal Options',
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onSelected: (val) {
+                    if (val == 'settings') {
+                      _openConfigDialog();
+                    } else if (val == 'clear') {
+                      _session.clearTerminal();
+                    } else if (val == 'toggle_conn') {
+                      if (_session.isConnected) {
+                        _session.disconnect();
+                      } else {
+                        _session.connect();
+                      }
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    PopupMenuItem(
+                      value: 'settings',
+                      child: Row(
+                        children: [
+                          Icon(Icons.tune_rounded, size: 16, color: colors.outline),
+                          const SizedBox(width: 10),
+                          const Text('SSH Settings', style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'clear',
+                      child: Row(
+                        children: [
+                          Icon(Icons.cleaning_services_rounded, size: 16, color: colors.outline),
+                          const SizedBox(width: 10),
+                          const Text('Clear Screen', style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'toggle_conn',
+                      child: Row(
+                        children: [
+                          Icon(
+                            _session.isConnected ? Icons.link_off_rounded : Icons.link_rounded,
+                            size: 16,
+                            color: _session.isConnected ? Colors.redAccent : const Color(0xFF81C784),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            _session.isConnected ? 'Disconnect' : 'Connect',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -262,7 +279,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
 
           // ─── Interactive Terminal Screen Area ───
           Container(
-            height: 185,
+            height: 180,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             color: const Color(0xFF0D1117),
@@ -278,7 +295,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                   ),
                 ),
 
-                // Disconnected overlay helper if idle
+                // Disconnected overlay button if offline
                 if (_session.state == SshConnectionState.disconnected)
                   Positioned(
                     right: 8,
@@ -286,10 +303,10 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                     child: FilledButton.tonalIcon(
                       style: FilledButton.styleFrom(
                         visualDensity: VisualDensity.compact,
-                        backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.85),
+                        backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.9),
                       ),
                       icon: const Icon(Icons.flash_on_rounded, size: 14),
-                      label: const Text('Connect Live SSH', style: TextStyle(fontSize: 11)),
+                      label: const Text('Connect SSH', style: TextStyle(fontSize: 11)),
                       onPressed: _session.connect,
                     ),
                   ),
@@ -299,10 +316,10 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
 
           const Divider(height: 1),
 
-          // ─── Shortcut Toolbar (Ctrl+C, Tab, Esc, Quick Commands) ───
+          // ─── Compact Essential Shortcuts Bar ───
           Container(
             color: const Color(0xFF161B22),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -310,22 +327,20 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                   _buildMiniKey('Ctrl+C', () => _session.sendCtrlC(), isDanger: true),
                   _buildMiniKey('Tab', () => _session.sendTab()),
                   _buildMiniKey('ESC', () => _session.sendEsc()),
-                  _buildMiniKey('▲', () => _session.sendArrowUp()),
-                  _buildMiniKey('▼', () => _session.sendArrowDown()),
-                  const SizedBox(width: 6),
-                  Container(height: 14, width: 1, color: Colors.grey.withValues(alpha: 0.3)),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
+                  Container(height: 12, width: 1, color: Colors.grey.withValues(alpha: 0.3)),
+                  const SizedBox(width: 4),
                   ..._quickCommands.map((cmd) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.only(right: 5),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(5),
                         onTap: () => _runCommand(cmd),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                           decoration: BoxDecoration(
                             color: const Color(0xFF21262D),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: const Color(0xFF30363D),
                             ),
@@ -351,7 +366,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
 
           // ─── Command Input Field ───
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+            padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
             child: Row(
               children: [
                 Expanded(
@@ -364,8 +379,8 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                     ),
                     decoration: InputDecoration(
                       hintText: _session.isConnected
-                          ? 'Enter shell command (e.g. htop, uptime)...'
-                          : 'Connect to host to send shell commands...',
+                          ? 'Command (e.g. htop, uptime)...'
+                          : 'Connect to run commands...',
                       hintStyle: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 11,
@@ -377,7 +392,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                           '>',
                           style: TextStyle(
                             fontFamily: 'monospace',
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF58A6FF),
                           ),
@@ -390,36 +405,37 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 10,
-                        vertical: 9,
+                        vertical: 8,
                       ),
                       filled: true,
                       fillColor: const Color(0xFF0D1117),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(color: Color(0xFF30363D)),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(color: Color(0xFF30363D)),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(color: Color(0xFF58A6FF)),
                       ),
                     ),
                     onSubmitted: _runCommand,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 IconButton.filledTonal(
                   style: IconButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
                     backgroundColor: const Color(0xFF238636),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  icon: const Icon(Icons.send_rounded, size: 16),
+                  icon: const Icon(Icons.send_rounded, size: 15),
                   tooltip: 'Execute Command',
                   onPressed: () => _runCommand(_commandController.text),
                 ),
@@ -433,15 +449,15 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
 
   Widget _buildMiniKey(String label, VoidCallback onTap, {bool isDanger = false}) {
     return Padding(
-      padding: const EdgeInsets.only(right: 5),
+      padding: const EdgeInsets.only(right: 4),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(4),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
           decoration: BoxDecoration(
             color: isDanger ? Colors.red.withValues(alpha: 0.15) : const Color(0xFF21262D),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(4),
             border: Border.all(
               color: isDanger ? Colors.red.withValues(alpha: 0.3) : const Color(0xFF30363D),
             ),
@@ -469,7 +485,7 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
       case SshConnectionState.connected:
         bg = const Color(0xFF1B3D20);
         border = const Color(0xFF4CAF50);
-        text = 'SSH LIVE';
+        text = 'LIVE';
         break;
       case SshConnectionState.connecting:
         bg = const Color(0xFF3E3113);
@@ -479,12 +495,12 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
       case SshConnectionState.error:
         bg = const Color(0xFF3B1A1A);
         border = Colors.redAccent;
-        text = 'SSH ERROR';
+        text = 'ERROR';
         break;
       case SshConnectionState.disconnected:
         bg = const Color(0xFF21262D);
         border = const Color(0xFF484F58);
-        text = 'DISCONNECTED';
+        text = 'OFFLINE';
         break;
     }
 
@@ -492,25 +508,35 @@ class _SshTerminalCardState extends State<SshTerminalCard> {
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: border, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: border,
+          if (_session.isConnecting)
+            SizedBox(
+              width: 8,
+              height: 8,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: border,
+              ),
+            )
+          else
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: border,
+              ),
             ),
-          ),
           const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 8.5,
               fontWeight: FontWeight.bold,
               color: border,
             ),
