@@ -1,5 +1,5 @@
 name: basalt_server_management
-description: "A new Flutter project."
+description: "Server monitoring made easy"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -38,6 +38,7 @@ dependencies:
   carousel_slider: ^5.1.2
   dartssh2: ^4.0.0
   xterm: ^4.0.0
+  rename_app: ^1.6.6
 
 dev_dependencies:
   flutter_test:
