@@ -39,7 +39,7 @@ jobs:
         run: flutter analyze
       
       - name: Build Release apk
-        run: flutter run build apk --release
+        run: flutter build apk --release
       
       - name: Rename apk
         run: |
